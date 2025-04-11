@@ -25,6 +25,16 @@ public class UserController {
         }
     }
 
+    @PostMapping("/users/login")
+    public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
+        try {
+            User loggedInUser = userService.loginUser(loginRequest.getEmail(), loginRequest.getPassword());
+            return ResponseEntity.ok(loggedInUser);  // You may want to return a token here instead of the user object
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(e.getMessage());  // 401 for invalid login attempts
+        }
+    }
+
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();

@@ -22,6 +22,21 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User loginUser(String email, String password) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("User not found with email: " + email);
+        }
+
+        User user = optionalUser.get();
+
+        if (password.equals(user.getPassword())) {
+            return user;
+        } else {
+            throw new RuntimeException("Invalid password");
+        }
+    }
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
