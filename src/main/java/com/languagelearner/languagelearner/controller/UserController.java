@@ -21,9 +21,13 @@ public class UserController {
             User registeredUser = userService.registerUser(user);
             return ResponseEntity.ok(registeredUser);
         } catch (RuntimeException e) {
+            if ("Email already registered".equals(e.getMessage())) {
+                return ResponseEntity.status(409).body(e.getMessage());  // 409 Conflict
+            }
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
 
     @PostMapping("/users/login")
     public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
