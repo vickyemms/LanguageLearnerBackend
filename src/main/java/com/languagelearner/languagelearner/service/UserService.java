@@ -7,6 +7,7 @@ import com.languagelearner.languagelearner.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,19 +33,28 @@ public class UserService {
     }
 
     public void verifyEmail(String token) {
-        // Find the token in the database
-        Optional<EmailVerificationToken> verificationToken = tokenRepository.findByToken(token);
+        Optional<EmailVerificationToken> optionalToken = tokenRepository.findByToken(token);
 
-        if (verificationToken.isPresent()) {
-            // Get the user from the token
-            User user = verificationToken.get().getUser();
-            user.setVerified(true);  // Set the user as verified
-            userRepository.save(user);
-            tokenRepository.delete(verificationToken.get());  // Delete the token after successful verification
-        } else {
+        if (optionalToken.isEmpty()) {
             throw new RuntimeException("Invalid or expired token");
         }
+
+        EmailVerificationToken verificationToken = optionalToken.get();
+
+        // Check if token is expired
+        if (verificationToken.getExpiresAt().before(new Date())) {
+            tokenRepository.delete(verificationToken); // Clean up expired token
+            throw new RuntimeException("Token has expired. Please request a new verification email.");
+        }
+
+        User user = verificationToken.getUser();
+
+        // Verify the user and clean up token
+        user.setVerified(true);
+        userRepository.save(user);
+        tokenRepository.delete(verificationToken);
     }
+
 
     public User registerUser(User user) {
         Optional<User> existing = userRepository.findByEmail(user.getEmail());

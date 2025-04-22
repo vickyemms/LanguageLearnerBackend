@@ -18,10 +18,13 @@ public class EmailVerificationToken {
 
     private Date createdAt;
 
+    private Date expiresAt;
+
     public EmailVerificationToken(String token, User user) {
         this.token = token;
         this.user = user;
         this.createdAt = new Date();
+        this.expiresAt = new Date(System.currentTimeMillis() + 1000 * 60 * 60);
     }
 }
 
