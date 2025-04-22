@@ -21,4 +21,7 @@ public class User {
     @Column(nullable = false)
     private String level;
 
+    @Column(nullable = false)
+    private boolean isVerified;
+
 }

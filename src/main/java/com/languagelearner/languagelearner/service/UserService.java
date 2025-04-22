@@ -1,18 +1,50 @@
 package com.languagelearner.languagelearner.service;
 
+import com.languagelearner.languagelearner.model.EmailVerificationToken;
 import com.languagelearner.languagelearner.model.User;
+import com.languagelearner.languagelearner.repository.EmailVerificationTokenRepository;
 import com.languagelearner.languagelearner.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EmailVerificationTokenRepository tokenRepository;
+
+    public String createEmailVerificationToken(User user) {
+        // Create a unique verification token
+        String token = UUID.randomUUID().toString();
+
+        // Save token in the database
+        EmailVerificationToken verificationToken = new EmailVerificationToken(token, user);
+        tokenRepository.save(verificationToken);
+
+        return token;
+    }
+
+    public void verifyEmail(String token) {
+        // Find the token in the database
+        Optional<EmailVerificationToken> verificationToken = tokenRepository.findByToken(token);
+
+        if (verificationToken.isPresent()) {
+            // Get the user from the token
+            User user = verificationToken.get().getUser();
+            user.setVerified(true);  // Set the user as verified
+            userRepository.save(user);
+            tokenRepository.delete(verificationToken.get());  // Delete the token after successful verification
+        } else {
+            throw new RuntimeException("Invalid or expired token");
+        }
+    }
 
     public User registerUser(User user) {
         Optional<User> existing = userRepository.findByEmail(user.getEmail());
