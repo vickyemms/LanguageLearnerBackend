@@ -31,6 +31,9 @@ public class UserController {
             userService.resendVerificationEmail(email);
             return ResponseEntity.ok("Verification email sent successfully.");
         } catch (RuntimeException e) {
+            if (e.getMessage().contains("Verification email has already been sent")) {
+                return ResponseEntity.status(429).body(e.getMessage()); // Too Many Requests (rate limiting)
+            }
             return ResponseEntity.status(400).body(e.getMessage()); // Handle errors like cooldown period
         }
     }
