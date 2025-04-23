@@ -5,6 +5,8 @@ import com.languagelearner.languagelearner.model.User;
 import com.languagelearner.languagelearner.repository.EmailVerificationTokenRepository;
 import com.languagelearner.languagelearner.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -21,6 +23,9 @@ public class UserService {
     @Autowired
     private EmailVerificationTokenRepository tokenRepository;
 
+    @Autowired
+    private JavaMailSender mailSender;
+
     public String createEmailVerificationToken(User user) {
         // Create a unique verification token
         String token = UUID.randomUUID().toString();
@@ -30,6 +35,50 @@ public class UserService {
         tokenRepository.save(verificationToken);
 
         return token;
+    }
+
+    public void sendVerificationEmail(String email, String token) {
+        String verificationUrl = "http://localhost:3000/verify-email?token=" + token;
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Email Verification");
+        message.setText("Please click the link below to verify your email address:\n\n" + verificationUrl);
+
+        mailSender.send(message);
+    }
+
+    public void resendVerificationEmail(String email) {
+        // Find the user by email
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Check if a token already exists for the user
+        Optional<EmailVerificationToken> existingToken = tokenRepository.findByUser(user);
+
+        if (existingToken.isPresent()) {
+            EmailVerificationToken token = existingToken.get();
+
+            // Check if the token was created within the last 5 minutes
+            if (new Date().getTime() - token.getCreatedAt().getTime() < 5 * 60 * 1000) {
+                // If a token is present and was sent less than 5 minutes ago, prevent resending
+                throw new RuntimeException("Verification email has already been sent. Please try again later.");
+            }
+
+            // Token is expired, or it's been more than 5 minutes, generate a new one
+            tokenRepository.delete(token); // Delete the old token
+        }
+
+        // Generate a new verification token
+        String newToken = UUID.randomUUID().toString();
+        EmailVerificationToken newVerificationToken = new EmailVerificationToken(newToken, user);
+
+        // Save the new token in the repository
+        tokenRepository.save(newVerificationToken);
+
+        // Send the verification email to the user with the new token
+        sendVerificationEmail(user.getEmail(), newToken);
+
     }
 
     public void verifyEmail(String token) {

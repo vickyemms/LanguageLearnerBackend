@@ -4,8 +4,6 @@ import com.languagelearner.languagelearner.model.User;
 import com.languagelearner.languagelearner.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,20 +15,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private JavaMailSender emailSender;
-
-    private void sendVerificationEmail(String email, String token) {
-        String verificationUrl = "http://localhost:3000/verify-email?token=" + token;
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("Email Verification");
-        message.setText("Please click the link below to verify your email address:\n\n" + verificationUrl);
-
-        emailSender.send(message);
-    }
-
     @GetMapping("/users/verify-email")
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
         try {
@@ -41,13 +25,23 @@ public class UserController {
         }
     }
 
+    @PostMapping("/resend-verification")
+    public ResponseEntity<String> resendVerificationEmail(@RequestBody String email) {
+        try {
+            userService.resendVerificationEmail(email);
+            return ResponseEntity.ok("Verification email sent successfully.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage()); // Handle errors like cooldown period
+        }
+    }
+
     @PostMapping("/users/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         try {
             User registeredUser = userService.registerUser(user);
 
             String token = userService.createEmailVerificationToken(user);
-            sendVerificationEmail(user.getEmail(), token);
+            userService.sendVerificationEmail(user.getEmail(), token);
 
             return ResponseEntity.ok(registeredUser);
         } catch (RuntimeException e) {
