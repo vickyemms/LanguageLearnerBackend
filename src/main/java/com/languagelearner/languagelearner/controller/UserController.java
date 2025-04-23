@@ -15,6 +15,10 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    public static class EmailRequest {
+        public String email;
+    }
+
     @GetMapping("/users/verify-email")
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
         try {
@@ -26,9 +30,9 @@ public class UserController {
     }
 
     @PostMapping("/resend-verification")
-    public ResponseEntity<String> resendVerificationEmail(@RequestBody String email) {
+    public ResponseEntity<String> resendVerificationEmail(@RequestBody EmailRequest request) {
         try {
-            userService.resendVerificationEmail(email);
+            userService.resendVerificationEmail(request.email);
             return ResponseEntity.ok("Verification email sent successfully.");
         } catch (RuntimeException e) {
             if (e.getMessage().contains("Verification email has already been sent")) {
