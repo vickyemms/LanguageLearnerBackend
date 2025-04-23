@@ -20,6 +20,9 @@ public class EmailVerificationToken {
 
     private Date expiresAt;
 
+    public EmailVerificationToken() {
+    }
+
     public EmailVerificationToken(String token, User user) {
         this.token = token;
         this.user = user;
