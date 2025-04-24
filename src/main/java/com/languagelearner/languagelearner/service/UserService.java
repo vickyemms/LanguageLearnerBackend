@@ -54,19 +54,38 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Check if a token already exists for the user
-        Optional<EmailVerificationToken> existingToken = tokenRepository.findByUser(user);
+        Optional<EmailVerificationToken> existingTokenOpt = tokenRepository.findByUser(user);
 
-        if (existingToken.isPresent()) {
-            EmailVerificationToken token = existingToken.get();
+        if (existingTokenOpt.isPresent()) {
+            EmailVerificationToken existingToken = existingTokenOpt.get();
+            long currentTime = new Date().getTime();
 
-            // Check if the token was created within the last 5 minutes
-            if (new Date().getTime() - token.getCreatedAt().getTime() < 5 * 60 * 1000) {
-                // If a token is present and was sent less than 5 minutes ago, prevent resending
+            // Check if the token was sent within the last 5 minutes (cooldown check)
+            if (existingToken.getSentAt() != null && currentTime - existingToken.getSentAt().getTime() < 5 * 60 * 1000) {
+                // If a token is sent within the last 5 minutes, prevent resending
                 throw new RuntimeException("Verification email has already been sent. Please try again later.");
             }
 
-            // Token is expired, or it's been more than 5 minutes, generate a new one
-            tokenRepository.delete(token); // Delete the old token
+            // Check if the token was created more than an hour ago and if it's expired
+            if (currentTime - existingToken.getCreatedAt().getTime() > 60 * 60 * 1000 || new Date().after(existingToken.getExpiresAt())) {
+                // If token is older than an hour or expired, delete the old token
+                tokenRepository.delete(existingToken);
+
+                // Generate a new token
+                String newToken = UUID.randomUUID().toString();
+                EmailVerificationToken newVerificationToken = new EmailVerificationToken(newToken, user);
+                tokenRepository.save(newVerificationToken);
+
+                // Send the verification email with the new token
+                sendVerificationEmail(user.getEmail(), newToken);
+                return;
+            } else {
+                // If token is still valid and within the time window (but older than 5 minutes), resend the existing token
+                sendVerificationEmail(user.getEmail(), existingToken.getToken());
+                existingToken.setSentAt(new Date());
+                tokenRepository.save(existingToken);
+                return;
+            }
         }
 
         // Generate a new verification token

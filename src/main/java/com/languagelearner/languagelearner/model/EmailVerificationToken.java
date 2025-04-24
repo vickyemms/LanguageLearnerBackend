@@ -20,6 +20,8 @@ public class EmailVerificationToken {
 
     private Date expiresAt;
 
+    private Date sentAt;
+
     public EmailVerificationToken() {
     }
 
@@ -28,6 +30,7 @@ public class EmailVerificationToken {
         this.user = user;
         this.createdAt = new Date();
         this.expiresAt = new Date(System.currentTimeMillis() + 1000 * 60 * 60);
+        this.sentAt = new Date();
     }
 }
 

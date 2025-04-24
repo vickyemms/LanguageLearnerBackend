@@ -16,9 +16,7 @@ public class TokenCleanupTask {
     @Scheduled(fixedRate = 1000 * 60 * 60) // every hour
     public void cleanUpExpiredTokens() {
         Date now = new Date();
-        tokenRepository.findAll().stream()
-                .filter(token -> token.getExpiresAt().before(now))
-                .forEach(tokenRepository::delete);
+        tokenRepository.deleteByExpiresAtBefore(now);
     }
 }
 
