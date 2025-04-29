@@ -7,6 +7,7 @@ import com.languagelearner.languagelearner.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -25,6 +26,9 @@ public class UserService {
 
     @Autowired
     private JavaMailSender mailSender;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public String createEmailVerificationToken(User user) {
 
@@ -110,6 +114,7 @@ public class UserService {
         if (existing.isPresent()) {
             throw new RuntimeException("Email already registered");
         }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
@@ -121,7 +126,7 @@ public class UserService {
 
         User user = optionalUser.get();
 
-        if (password.equals(user.getPassword())) {
+        if (passwordEncoder.matches(password, user.getPassword())) {
             return user;
         } else {
             throw new RuntimeException("Invalid password");
@@ -169,7 +174,7 @@ public class UserService {
         User user = optionalUser.get();
 
         if (newPassword != null && !newPassword.isBlank()) {
-            user.setPassword(newPassword);
+            user.setPassword(passwordEncoder.encode(newPassword));
         }
 
         return userRepository.save(user);
