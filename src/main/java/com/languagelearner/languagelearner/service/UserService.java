@@ -117,10 +117,11 @@ public class UserService {
 
         User user = verificationToken.getUser();
 
-        // Verify the user and clean up token
-        user.setVerified(true);
-        userRepository.save(user);
-        tokenRepository.delete(verificationToken);
+        if (!user.isVerified()) {
+            user.setVerified(true);
+            userRepository.save(user);
+        }
+
     }
 
 
