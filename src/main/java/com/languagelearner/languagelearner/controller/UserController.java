@@ -105,7 +105,6 @@ public class UserController {
         }
     }
 
-    // PUT /api/users/update-password
     @PutMapping("/users/update-password")
     public ResponseEntity<?> updatePassword(@RequestParam String email,
                                             @RequestParam String newPassword) {
