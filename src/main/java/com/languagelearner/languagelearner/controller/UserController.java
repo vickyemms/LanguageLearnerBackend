@@ -36,9 +36,9 @@ public class UserController {
             return ResponseEntity.ok("Verification email sent successfully.");
         } catch (RuntimeException e) {
             if (e.getMessage().contains("Verification email has already been sent")) {
-                return ResponseEntity.status(429).body(e.getMessage()); // Too Many Requests (rate limiting)
+                return ResponseEntity.status(429).body(e.getMessage());
             }
-            return ResponseEntity.status(400).body(e.getMessage()); // Handle errors like cooldown period
+            return ResponseEntity.status(400).body(e.getMessage());
         }
     }
 
@@ -53,7 +53,7 @@ public class UserController {
             return ResponseEntity.ok(registeredUser);
         } catch (RuntimeException e) {
             if ("Email already registered".equals(e.getMessage())) {
-                return ResponseEntity.status(409).body(e.getMessage());  // 409 Conflict
+                return ResponseEntity.status(409).body(e.getMessage());
             }
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -63,9 +63,9 @@ public class UserController {
     public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
         try {
             User loggedInUser = userService.loginUser(loginRequest.getEmail(), loginRequest.getPassword());
-            return ResponseEntity.ok(loggedInUser);  // You may want to return a token here instead of the user object
+            return ResponseEntity.ok(loggedInUser);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(401).body(e.getMessage());  // 401 for invalid login attempts
+            return ResponseEntity.status(401).body(e.getMessage());
         }
     }
 

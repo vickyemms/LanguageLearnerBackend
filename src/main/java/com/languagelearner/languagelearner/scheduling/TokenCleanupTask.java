@@ -13,7 +13,7 @@ public class TokenCleanupTask {
     @Autowired
     private EmailVerificationTokenRepository tokenRepository;
 
-    @Scheduled(fixedRate = 1000 * 60 * 60) // every hour
+    @Scheduled(fixedRate = 1000 * 60 * 60)
     public void cleanUpExpiredTokens() {
         Date now = new Date();
         tokenRepository.deleteByExpiresAtBefore(now);
