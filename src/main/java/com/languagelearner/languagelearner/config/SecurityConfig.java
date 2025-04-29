@@ -15,7 +15,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable()) // Proper way in Spring Security 6.1+
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/users/login",
@@ -24,10 +24,10 @@ public class SecurityConfig {
                                 "/resend-verification",
                                 "/users/email/**"
                         ).permitAll()
-                        .anyRequest().permitAll() // Or `.authenticated()` for protected routes
+                        .anyRequest().permitAll()
                 )
-                .formLogin(login -> login.disable()) // Also updated syntax
-                .httpBasic(basic -> basic.disable()); // Updated syntax
+                .formLogin(login -> login.disable())
+                .httpBasic(basic -> basic.disable());
 
         return http.build();
     }
