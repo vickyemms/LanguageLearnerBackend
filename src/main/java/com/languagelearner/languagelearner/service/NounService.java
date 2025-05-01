@@ -21,7 +21,7 @@ public class NounService {
                 : nounRepository.findAll();
 
         return nouns.stream().map(noun -> {
-            Map<String, Object> dto = new HashMap<>();
+            Map<String, Object> dto = new LinkedHashMap<>();
             dto.put("id", noun.getId());
             dto.put("category", noun.getCategory());
             dto.put("imageUrl", noun.getImageUrl());
@@ -56,5 +56,6 @@ public class NounService {
             return dto;
         }).collect(Collectors.toList());
     }
+
 
 }
