@@ -4,6 +4,7 @@ import com.languagelearner.languagelearner.repository.EmailVerificationTokenRepo
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
@@ -13,6 +14,7 @@ public class TokenCleanupTask {
     @Autowired
     private EmailVerificationTokenRepository tokenRepository;
 
+    @Transactional
     @Scheduled(fixedRate = 1000 * 60 * 60)
     public void cleanUpExpiredTokens() {
         Date now = new Date();
