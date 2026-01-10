@@ -21,10 +21,10 @@ public class SecurityConfig {
                                 "/users/login",
                                 "/users/register",
                                 "/users/verify-email",
-                                "/resend-verification",
+                                "/users/resend-verification",
                                 "/users/email/**"
                         ).permitAll()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .formLogin(login -> login.disable())
                 .httpBasic(basic -> basic.disable());
