@@ -24,7 +24,6 @@ public class UserController {
         public String email;
     }
 
-    // -------------------- API Control Points & Logging --------------------
     @GetMapping("/verify-email")
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
         logger.info("API /users/verify-email called with token: {}", token); // API control point
