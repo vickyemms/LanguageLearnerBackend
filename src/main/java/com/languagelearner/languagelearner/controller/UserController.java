@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -26,13 +25,13 @@ public class UserController {
 
     @GetMapping("/verify-email")
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
-        logger.info("API /users/verify-email called with token: {}", token); // API control point
+        logger.info("API /users/verify-email called");
         try {
             userService.verifyEmail(token);
-            logger.info("Email verification successful for token: {}", token);
+            logger.info("Email verification successful for token");
             return ResponseEntity.ok("Email successfully verified!");
         } catch (RuntimeException e) {
-            logger.error("Email verification failed for token {}: {}", token, e.getMessage());
+            logger.error("Email verification failed: {}", e.getMessage());
             return ResponseEntity.status(400).body("Invalid token or token expired.");
         }
     }
