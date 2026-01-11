@@ -149,12 +149,12 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> {
                     logger.warn("Login failed: user not found");
-                    return new RuntimeException("Invalid credentials");
+                    return new RuntimeException("User not found");
                 });
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             logger.warn("Login failed: invalid password");
-            throw new RuntimeException("Invalid credentials");
+            throw new RuntimeException("Invalid password");
         }
 
         logger.info("User logged in successfully");
