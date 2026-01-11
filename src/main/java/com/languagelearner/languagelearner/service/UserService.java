@@ -121,7 +121,7 @@ public class UserService {
     public User loginUser(String email, String password) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isEmpty()) {
-            throw new RuntimeException("User not found with email: " + email);
+            throw new RuntimeException("User not found");
         }
 
         User user = optionalUser.get();
@@ -144,7 +144,7 @@ public class UserService {
     public void deleteUserByEmail(String email) {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isEmpty()) {
-            throw new RuntimeException("User not found with email: " + email);
+            throw new RuntimeException("User not found");
         }
         userRepository.delete(user.get());
     }
@@ -152,7 +152,7 @@ public class UserService {
     public User updateEmail(String currentEmail, String newEmail) {
         Optional<User> optionalUser = userRepository.findByEmail(currentEmail);
         if (optionalUser.isEmpty()) {
-            throw new RuntimeException("User not found with email: " + currentEmail);
+            throw new RuntimeException("User not found");
         }
 
         User user = optionalUser.get();
@@ -168,7 +168,7 @@ public class UserService {
     public User updatePassword(String email, String newPassword) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isEmpty()) {
-            throw new RuntimeException("User not found with email: " + email);
+            throw new RuntimeException("User not found");
         }
 
         User user = optionalUser.get();
